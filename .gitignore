@@ -8,8 +8,8 @@ coverage/
 !.env.example
 venv/
 data/
-package-lock.json
 yarn.lock
+frontend/.vite/
 .idea/
 .vscode/
 *.iml

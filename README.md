@@ -59,7 +59,7 @@ Once the installation is complete, you can start the application using the provi
 run_app.bat
 ```
 
-This command will launch the backend server and frontend application, which you can access in your web browser, typically at `http://localhost:5173`.
+This command will launch the backend server and frontend application, which you can access in your web browser, typically at `http://localhost:3000`.
 
 ## 📁 Project Structure
 

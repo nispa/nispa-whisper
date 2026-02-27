@@ -1,0 +1,16 @@
+Flask==3.0.0
+flask-cors==4.0.0
+librosa==0.10.1
+pydub==0.25.1
+SQLAlchemy==2.0.23
+python-dotenv==1.0.0
+gunicorn==21.2.0
+werkzeug==3.0.1
+faster-whisper==1.0.3
+av==12.0.0
+
+# Nota per CUDA 13.1: 
+# PyTorch non ha ancora i binari precompilati specifici per "cu131", 
+# ma i driver CUDA 13.1 sono retrocompatibili con i binari di CUDA 12.4 o 12.1.
+# Installa PyTorch usando questo comando separato prima di installare il resto:
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu130

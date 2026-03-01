@@ -1,11 +1,11 @@
 export const API_BASE = 'http://localhost:5000/api';
 
-export async function startTranscription(file: File, model: string, language: string, diarization: boolean) {
+export async function startTranscription(file: File, model: string, language: string) {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('model', model);
   formData.append('language', language);
-  formData.append('diarization', diarization.toString());
+  formData.append('diarization', 'false');
 
   const res = await fetch(`${API_BASE}/transcribe`, {
     method: 'POST',
@@ -25,11 +25,11 @@ export async function getJobStatus(jobId: string) {
   return res.json();
 }
 
-export async function exportTranscription(jobId: string, format: string, includeSpeakers: boolean = true) {
+export async function exportTranscription(jobId: string, format: string) {
   const res = await fetch(`${API_BASE}/export`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ job_id: jobId, format, include_speakers: includeSpeakers })
+    body: JSON.stringify({ job_id: jobId, format, include_speakers: false })
   });
   if (!res.ok) throw new Error('Failed to export');
   return res.json();

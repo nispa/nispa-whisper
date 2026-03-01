@@ -109,3 +109,18 @@ def generate_csv(segments, speaker_labels=True):
 def generate_json(segments):
     """Genera un output JSON strutturato"""
     return json.dumps({"segments": segments}, indent=2, ensure_ascii=False)
+
+def generate_mcp(segments, filename=""):
+    """Genera un output in formato MCP (Model Context Protocol) per servizi AI"""
+    full_text = " ".join([seg['text'].strip() for seg in segments])
+    
+    return json.dumps({
+        "mcp_version": "1.0",
+        "metadata": {
+            "source": filename,
+            "type": "transcription",
+            "segments_count": len(segments),
+            "total_characters": len(full_text)
+        },
+        "text": full_text
+    }, indent=2, ensure_ascii=False)

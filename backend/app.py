@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 from gpu.cuda_check import get_gpu_info
 from models.whisper_wrapper import WhisperInference
 from audio.processor import prepare_audio
-from transcribe.export import generate_srt, generate_json, generate_vtt, generate_txt, generate_csv
+from transcribe.export import generate_srt, generate_json, generate_vtt, generate_txt, generate_csv, generate_mcp
 from database import init_db, create_project, update_project_status, save_segments, get_project, get_projects, get_segments, delete_project, clear_all_data
 
 app = Flask(__name__)
@@ -303,6 +303,11 @@ def export_transcription():
         mimetype = 'text/csv'
     elif format_type == 'json':
         content = generate_json(segments)
+        mimetype = 'application/json'
+    elif format_type == 'mcp':
+        project = get_project(job_id)
+        filename = project.get('name', 'transcription') if project else 'transcription'
+        content = generate_mcp(segments, filename=filename)
         mimetype = 'application/json'
     else:
         return jsonify({"error": "Formato non supportato"}), 400

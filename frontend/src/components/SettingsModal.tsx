@@ -1,11 +1,24 @@
 import React from 'react';
 import { X, Save } from 'lucide-react';
+import aiModelsData from '../ai_models.json';
+
+const aiModels = aiModelsData as Record<string, { 
+  provider: string, 
+  base_url: string,
+  docs_models: string,
+  docs_api: string,
+  models: Record<string, string[]> 
+}>;
 
 export interface AppSettings {
   defaultModel: string;
   defaultLanguage: string;
-  defaultDiarization: boolean;
   interfaceLanguage: 'it' | 'en';
+  aiService?: string;
+  aiApiKey?: string;
+  aiModel?: string;
+  aiCustomUrl?: string;
+  aiMcpFormat?: string;
 }
 
 interface SettingsModalProps {
@@ -30,6 +43,22 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave, t }: 
     onClose();
   };
 
+  const handleServiceChange = (service: string) => {
+    const newSettings = { ...localSettings, aiService: service };
+    if (service !== 'custom' && aiModels[service]) {
+      newSettings.aiCustomUrl = aiModels[service].base_url;
+      const categories = Object.keys(aiModels[service].models);
+      if (categories.length > 0) {
+        const firstCategory = categories[0];
+        const models = aiModels[service].models[firstCategory];
+        if (models.length > 0) {
+          newSettings.aiModel = models[0];
+        }
+      }
+    }
+    setLocalSettings(newSettings);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-[#1e1e1e] border border-gray-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
@@ -40,7 +69,7 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave, t }: 
           </button>
         </div>
         
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Lingua Interfaccia / Interface Language</label>
             <select 
@@ -53,55 +82,144 @@ export default function SettingsModal({ isOpen, onClose, settings, onSave, t }: 
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              {localSettings.interfaceLanguage === 'en' ? 'Default Model' : 'Modello Predefinito'}
-            </label>
-            <select 
-              value={localSettings.defaultModel}
-              onChange={(e) => setLocalSettings({ ...localSettings, defaultModel: e.target.value })}
-              className="w-full bg-[#141414] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-colors"
-            >
-              <option value="tiny">Veloce (Tiny)</option>
-              <option value="base">Equilibrato (Base)</option>
-              <option value="small">Qualità Alta (Small)</option>
-              <option value="medium">Qualità Massima (Medium)</option>
-              <option value="large-v3">Precisione Pro (Large-v3)</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Lingua Predefinita</label>
-            <select 
-              value={localSettings.defaultLanguage}
-              onChange={(e) => setLocalSettings({ ...localSettings, defaultLanguage: e.target.value })}
-              className="w-full bg-[#141414] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-colors"
-            >
-              <option value="auto">Rilevamento Automatico</option>
-              <option value="it">Italiano</option>
-              <option value="en">Inglese</option>
-              <option value="fr">Francese</option>
-              <option value="es">Spagnolo</option>
-              <option value="de">Tedesco</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="flex items-center justify-between cursor-pointer p-4 bg-[#141414] border border-gray-700 rounded-lg hover:border-gray-600 transition-colors">
+          <div className="pt-4 border-t border-gray-800">
+            <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-4">Trascrizione</h3>
+            <div className="space-y-4">
               <div>
-                <span className="block text-sm font-medium text-gray-200">Diarization Predefinita</span>
-                <span className="block text-xs text-gray-500 mt-1">Identifica i parlanti di default</span>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  {localSettings.interfaceLanguage === 'en' ? 'Default Model' : 'Modello Predefinito'}
+                </label>
+                <select 
+                  value={localSettings.defaultModel}
+                  onChange={(e) => setLocalSettings({ ...localSettings, defaultModel: e.target.value })}
+                  className="w-full bg-[#141414] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-colors"
+                >
+                  <option value="tiny">Veloce (Tiny)</option>
+                  <option value="base">Equilibrato (Base)</option>
+                  <option value="small">Qualità Alta (Small)</option>
+                  <option value="medium">Qualità Massima (Medium)</option>
+                  <option value="large-v3">Precisione Pro (Large-v3)</option>
+                </select>
               </div>
-              <div className={`w-12 h-6 rounded-full p-1 transition-colors ${localSettings.defaultDiarization ? 'bg-blue-600' : 'bg-gray-600'}`}>
-                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${localSettings.defaultDiarization ? 'translate-x-6' : 'translate-x-0'}`} />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Lingua Predefinita</label>
+                <select 
+                  value={localSettings.defaultLanguage}
+                  onChange={(e) => setLocalSettings({ ...localSettings, defaultLanguage: e.target.value })}
+                  className="w-full bg-[#141414] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-colors"
+                >
+                  <option value="auto">Rilevamento Automatico</option>
+                  <option value="it">Italiano</option>
+                  <option value="en">Inglese</option>
+                  <option value="fr">Francese</option>
+                  <option value="es">Spagnolo</option>
+                  <option value="de">Tedesco</option>
+                </select>
               </div>
-              <input 
-                type="checkbox" 
-                className="hidden" 
-                checked={localSettings.defaultDiarization}
-                onChange={(e) => setLocalSettings({ ...localSettings, defaultDiarization: e.target.checked })}
-              />
-            </label>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-800">
+            <h3 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-4">Configurazione AI (Analisi)</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Servizio AI</label>
+                <select 
+                  value={localSettings.aiService || 'gemini'}
+                  onChange={(e) => handleServiceChange(e.target.value)}
+                  className="w-full bg-[#141414] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-colors"
+                >
+                  <option value="gemini">Google Gemini</option>
+                  <option value="openai">OpenAI ChatGPT</option>
+                  <option value="anthropic">Anthropic Claude</option>
+                  <option value="deepseek">DeepSeek</option>
+                  <option value="custom">Custom MCP / API</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">API Key</label>
+                <input 
+                  type="password"
+                  value={localSettings.aiApiKey || ''}
+                  onChange={(e) => setLocalSettings({ ...localSettings, aiApiKey: e.target.value })}
+                  placeholder="sk-..."
+                  className="w-full bg-[#141414] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Modello AI</label>
+                {localSettings.aiService === 'custom' ? (
+                  <input 
+                    type="text"
+                    value={localSettings.aiModel || ''}
+                    onChange={(e) => setLocalSettings({ ...localSettings, aiModel: e.target.value })}
+                    placeholder="gemini-1.5-pro, gpt-4o, etc."
+                    className="w-full bg-[#141414] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                ) : (
+                  <select 
+                    value={localSettings.aiModel || ''}
+                    onChange={(e) => setLocalSettings({ ...localSettings, aiModel: e.target.value })}
+                    className="w-full bg-[#141414] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-colors"
+                  >
+                    {Object.entries(aiModels[localSettings.aiService || 'gemini']?.models || {}).map(([category, models]) => (
+                      <optgroup key={category} label={category.replace(/_/g, ' ').toUpperCase()}>
+                        {models.map(model => (
+                          <option key={model} value={model}>{model}</option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">API URL</label>
+                <input 
+                  type="text"
+                  value={localSettings.aiCustomUrl || ''}
+                  onChange={(e) => setLocalSettings({ ...localSettings, aiCustomUrl: e.target.value })}
+                  placeholder="https://api.example.com/v1"
+                  className="w-full bg-[#141414] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-colors"
+                />
+                {localSettings.aiService !== 'custom' && aiModels[localSettings.aiService || 'gemini'] && (
+                  <div className="mt-2 flex gap-4">
+                    <a 
+                      href={aiModels[localSettings.aiService || 'gemini'].docs_api} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-400 hover:text-blue-300 underline"
+                    >
+                      API Docs
+                    </a>
+                    <a 
+                      href={aiModels[localSettings.aiService || 'gemini'].docs_models} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-400 hover:text-blue-300 underline"
+                    >
+                      Models Docs
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {localSettings.aiService === 'custom' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Formato MCP</label>
+                  <input 
+                    type="text"
+                    value={localSettings.aiMcpFormat || ''}
+                    onChange={(e) => setLocalSettings({ ...localSettings, aiMcpFormat: e.target.value })}
+                    placeholder="mcp-1.0, custom-schema, etc."
+                    className="w-full bg-[#141414] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

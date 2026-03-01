@@ -1,5 +1,5 @@
 {
   "name": "nispa-whisper",
-  "description": "a desktop application that allows you to transcribe audio and video files using the power of OpenAI's Whisper model, optimized for speed with `faster-whisper`. It provides a user-friendly interface to manage, view, and edit your transcriptions.",
+  "description": "Applicazione desktop-style per la trascrizione automatica di file audio e video con intelligenza artificiale (Whisper).",
   "requestFramePermissions": []
 }

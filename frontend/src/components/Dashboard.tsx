@@ -47,7 +47,6 @@ export default function Dashboard({ onNewProject, onResumeProject, t }: Dashboar
       file: null, // We don't have the File object, but Editor will use the media URL
       model: p.model,
       language: p.language,
-      diarization: p.diarization === 1,
       saveLocation: ''
     };
     // The segments will be fetched by the Editor, or we can pass empty array and let Editor fetch

@@ -56,7 +56,7 @@ export default function Setup({ initialJob, onStart, onCancel, t }: SetupProps) 
     setIsSubmitting(true);
     setError(null);
     try {
-      const data = await startTranscription(job.file, job.model, job.language, job.diarization);
+      const data = await startTranscription(job.file, job.model, job.language);
       onStart({ ...job, id: data.job_id });
     } catch (e: any) {
       const msg = e.message === 'Failed to fetch' 
@@ -192,25 +192,6 @@ export default function Setup({ initialJob, onStart, onCancel, t }: SetupProps) 
                     <option value="es">Español</option>
                     <option value="de">Deutsch</option>
                   </select>
-                </div>
-
-                {/* Diarization */}
-                <div>
-                  <label className="flex items-center justify-between cursor-pointer p-4 bg-gray-800/30 border border-gray-700 rounded-lg hover:border-gray-500 transition-colors">
-                    <div>
-                      <span className="block text-sm font-medium text-gray-200">{t('setup.diarization')}</span>
-                      <span className="block text-xs text-gray-500 mt-1">{t('setup.diarizationDesc')}</span>
-                    </div>
-                    <div className={`w-12 h-6 rounded-full p-1 transition-colors ${job.diarization ? 'bg-blue-600' : 'bg-gray-600'}`}>
-                      <div className={`w-4 h-4 rounded-full bg-white transition-transform ${job.diarization ? 'translate-x-6' : 'translate-x-0'}`} />
-                    </div>
-                    <input 
-                      type="checkbox" 
-                      className="hidden" 
-                      checked={job.diarization}
-                      onChange={(e) => setJob({ ...job, diarization: e.target.checked })}
-                    />
-                  </label>
                 </div>
               </div>
             </div>

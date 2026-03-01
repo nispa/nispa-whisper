@@ -23,6 +23,5 @@ export interface TranscriptionJob {
   file: File | null;
   model: string;
   language: string;
-  diarization: boolean;
   saveLocation: string;
 }

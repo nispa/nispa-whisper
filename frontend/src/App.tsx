@@ -53,14 +53,26 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        return { ...parsed, interfaceLanguage: parsed.interfaceLanguage || 'it' };
+        return { 
+          ...parsed, 
+          interfaceLanguage: parsed.interfaceLanguage || 'it',
+          aiService: parsed.aiService || 'gemini',
+          aiApiKey: parsed.aiApiKey || '',
+          aiModel: parsed.aiModel || 'gemini-1.5-pro',
+          aiCustomUrl: parsed.aiCustomUrl || '',
+          aiMcpFormat: parsed.aiMcpFormat || 'mcp-1.0'
+        };
       } catch (e) {}
     }
     return {
       defaultModel: 'medium',
       defaultLanguage: 'auto',
-      defaultDiarization: false,
       interfaceLanguage: 'it',
+      aiService: 'gemini',
+      aiApiKey: '',
+      aiModel: 'gemini-1.5-pro',
+      aiCustomUrl: '',
+      aiMcpFormat: 'mcp-1.0'
     };
   });
 
@@ -94,7 +106,6 @@ export default function App() {
     file: null,
     model: appSettings.defaultModel,
     language: appSettings.defaultLanguage,
-    diarization: appSettings.defaultDiarization,
     saveLocation: './data',
   });
   
@@ -110,7 +121,6 @@ export default function App() {
       file: null,
       model: appSettings.defaultModel,
       language: appSettings.defaultLanguage,
-      diarization: appSettings.defaultDiarization,
       saveLocation: './data',
     });
     setCurrentScreen('setup');

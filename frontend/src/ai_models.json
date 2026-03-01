@@ -1,0 +1,74 @@
+{
+  "gemini": {
+    "provider": "Google Gemini API",
+    "base_url": "https://generativelanguage.googleapis.com",
+    "docs_models": "https://ai.google.dev/gemini-api/docs/models",
+    "docs_api": "https://ai.google.dev/api",
+    "models": {
+      "text_multimodal": [
+        "gemini-3.1-pro-preview",
+        "gemini-3-flash-preview",
+        "gemini-2.0-pro",
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite"
+      ],
+      "embedding": [
+        "gemini-embedding-001"
+      ]
+    }
+  },
+  "openai": {
+    "provider": "OpenAI (ChatGPT API)",
+    "base_url": "https://api.openai.com/v1",
+    "docs_models": "https://platform.openai.com/docs/models",
+    "docs_api": "https://platform.openai.com/docs/api-reference",
+    "models": {
+      "frontier_gpt": [
+        "gpt-5.2",
+        "gpt-5.2-chat",
+        "gpt-5-mini",
+        "gpt-4.1",
+        "gpt-4o"
+      ],
+      "reasoning_o_series": [
+        "o3",
+        "o3-pro",
+        "o4-mini"
+      ]
+    }
+  },
+  "anthropic": {
+    "provider": "Anthropic Claude API",
+    "base_url": "https://api.anthropic.com/v1",
+    "docs_models": "https://docs.anthropic.com/en/docs/models-overview",
+    "docs_api": "https://docs.anthropic.com/en/api",
+    "models": {
+      "opus": [
+        "claude-opus-4-6",
+        "claude-opus-4.5"
+      ],
+      "sonnet": [
+        "claude-sonnet-4.5"
+      ],
+      "haiku": [
+        "claude-haiku-4.5"
+      ]
+    }
+  },
+  "deepseek": {
+    "provider": "DeepSeek API",
+    "base_url": "https://api.deepseek.com",
+    "docs_models": "https://platform.deepseek.com/api-docs/",
+    "docs_api": "https://platform.deepseek.com/api-docs/",
+    "models": {
+      "api_primary": [
+        "deepseek-chat",
+        "deepseek-reasoner"
+      ],
+      "underlying_families": [
+        "deepseek-r1",
+        "deepseek-v3"
+      ]
+    }
+  }
+}

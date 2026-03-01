@@ -191,11 +191,6 @@ export default function Transcribing({ job, onComplete, onCancel, t }: Transcrib
             
             {liveSegments.map((segment, i) => (
               <p key={i} className="mb-4">
-                {job.diarization && (
-                  <span className={`font-sans text-sm font-bold mr-3 uppercase ${segment.speaker.includes('1') ? 'text-blue-400' : 'text-green-400'}`}>
-                    {segment.speaker}
-                  </span> 
-                )}
                 {segment.text}
               </p>
             ))}

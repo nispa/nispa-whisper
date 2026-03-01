@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Download, Search, Undo, Redo, MoreVertical, Edit3, SplitSquareHorizontal, Merge } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Download, Search, Undo, Redo, MoreVertical, Edit3, SplitSquareHorizontal, Merge, Copy } from 'lucide-react';
 import { TranscriptionJob, Segment } from '../types';
 import { exportTranscription, getProjectDetails, API_BASE, reuploadMedia } from '../api';
 
@@ -16,6 +16,8 @@ export default function Editor({ job, segments: initialSegments, onBack, t }: Ed
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(initialSegments.length === 0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -276,7 +278,7 @@ export default function Editor({ job, segments: initialSegments, onBack, t }: Ed
     if (!job.id) return;
     setIsExporting(true);
     try {
-      const data = await exportTranscription(job.id, exportFormat, job.diarization);
+      const data = await exportTranscription(job.id, exportFormat);
       
       // Create a blob and download it
       const blob = new Blob([data.content], { type: 'text/plain' });
@@ -292,6 +294,22 @@ export default function Editor({ job, segments: initialSegments, onBack, t }: Ed
       alert("Errore durante l'esportazione.");
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!job.id) return;
+    setIsCopying(true);
+    try {
+      const data = await exportTranscription(job.id, exportFormat);
+      await navigator.clipboard.writeText(data.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      alert('Failed to copy to clipboard');
+    } finally {
+      setIsCopying(false);
     }
   };
 
@@ -372,7 +390,17 @@ export default function Editor({ job, segments: initialSegments, onBack, t }: Ed
             <option value="vtt">VTT</option>
             <option value="txt">TXT</option>
             <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+            <option value="mcp">JSON (MCP)</option>
           </select>
+          <button 
+            onClick={handleCopy}
+            disabled={isCopying}
+            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors border border-gray-700 disabled:opacity-50"
+          >
+            <Copy size={16} />
+            {isCopying ? t('editor.copying') : (copied ? t('editor.copied') : t('editor.copy'))}
+          </button>
           <button 
             onClick={handleExport}
             disabled={isExporting}
@@ -598,24 +626,7 @@ export default function Editor({ job, segments: initialSegments, onBack, t }: Ed
                     [{index + 1}] {formatTime(segment.start).slice(3, 8)}
                   </span>
                   
-                  {job.diarization ? (
-                    <input 
-                      type="text"
-                      value={segment.speaker}
-                      onChange={(e) => handleSpeakerChange(segment.id, e.target.value)}
-                      onBlur={handleSpeakerBlur}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleSpeakerBlur();
-                        }
-                      }}
-                      className={`text-xs font-bold uppercase tracking-wider bg-transparent border-b border-transparent focus:border-blue-500 focus:outline-none transition-colors w-full pb-1
-                        ${segment.speaker.includes('1') ? 'text-blue-400' : 'text-emerald-400'}`}
-                    />
-                  ) : (
-                    <span className="text-xs font-bold uppercase tracking-wider text-gray-600 pb-1">{t('editor.text')}</span>
-                  )}
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-600 pb-1">{t('editor.text')}</span>
                 </div>
 
                 {/* Right: Text Content */}

@@ -414,7 +414,7 @@ export default function Editor({ job, segments: initialSegments, onBack, t }: Ed
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel: Video/Audio Player (30%) */}
-        <div className="w-[30%] min-w-[320px] max-w-[400px] border-r border-gray-800 bg-[#1a1a1a] flex flex-col h-full">
+        <div className="w-[30%] min-w-[320px] max-w-[400px] border-r border-gray-800 bg-[#1a1a1a] flex flex-col min-h-0">
           {/* Player Area */}
           <div className="aspect-video bg-black relative flex items-center justify-center group overflow-hidden">
             {mediaError ? (
@@ -608,7 +608,7 @@ export default function Editor({ job, segments: initialSegments, onBack, t }: Ed
         </div>
 
         {/* Right Panel: Transcript Editor (70%) */}
-        <div className="flex-1 bg-[#141414] overflow-y-auto p-8 lg:p-12 h-full">
+        <div className="flex-1 bg-[#141414] overflow-y-auto p-8 lg:p-12 min-h-0">
           <div className="max-w-4xl mx-auto space-y-3">
             {segments.map((segment, index) => (
               <div 

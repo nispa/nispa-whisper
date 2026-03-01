@@ -5,6 +5,13 @@
     "postinstall": "cd frontend && npm install",
     "dev": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
+    "test": "cd frontend && npm run test",
     "lint": "cd frontend && npm run lint"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "jsdom": "^28.1.0",
+    "vitest": "^4.0.18"
   }
 }

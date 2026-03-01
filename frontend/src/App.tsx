@@ -141,7 +141,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#141414] text-gray-200 font-sans flex flex-col">
+    <div className="h-screen bg-[#141414] text-gray-200 font-sans flex flex-col overflow-hidden">
       {/* Top Bar */}
       <header className="h-14 bg-[#1e1e1e] border-b border-gray-800 flex items-center justify-between px-6 shrink-0">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentScreen('dashboard')}>

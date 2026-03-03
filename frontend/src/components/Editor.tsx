@@ -102,6 +102,17 @@ export default function Editor({ job, segments: initialSegments, onBack, t }: Ed
     const handleTimeUpdate = () => {
       setCurrentTime(video.currentTime);
       
+      // Se stiamo editando, evitiamo di saltare ad altri segmenti
+      // e mettiamo in pausa alla fine del segmento corrente
+      if (editingId) {
+        const editingSegment = segments.find(s => s.id === editingId);
+        if (editingSegment && video.currentTime >= editingSegment.end) {
+          video.pause();
+          setIsPlaying(false);
+        }
+        return;
+      }
+
       // Auto-scroll and highlight active segment
       const currentSegment = segments.find(s => video.currentTime >= s.start && video.currentTime <= s.end);
       if (currentSegment && currentSegment.id !== activeSegmentId && isPlaying) {
@@ -125,7 +136,7 @@ export default function Editor({ job, segments: initialSegments, onBack, t }: Ed
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
-  }, [segments, activeSegmentId, isPlaying]);
+  }, [segments, activeSegmentId, isPlaying, editingId]);
 
   const handleSegmentClick = (segment: Segment) => {
     setActiveSegmentId(segment.id);

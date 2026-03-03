@@ -13,46 +13,46 @@ class WhisperInference:
         self.device = device
         self.compute_type = compute_type
         
-        # Carica il modello nella cartella locale data/models per portabilità
+        # Load the model in the local data/models folder for portability
         model_dir = os.path.join(os.path.dirname(__file__), '../../data/models')
         os.makedirs(model_dir, exist_ok=True)
         
-        print(f"Caricamento modello {model_name} su {device} con {compute_type}...")
+        print(f"Loading {model_name} model on {device} with {compute_type}...")
         self.model = WhisperModel(
             model_name, 
             device=device, 
             compute_type=compute_type,
             download_root=model_dir
         )
-        print("Modello caricato con successo.")
+        print("Model loaded successfully.")
 
     def transcribe(self, audio_file, language=None, diarization=False, progress_callback=None):
         """
-        Esegue la trascrizione. La diarization avanzata è disabilitata in questa versione 
-        per mantenere l'app 100% offline senza dipendenze da HuggingFace.
+        Executes transcription. Advanced diarization is disabled in this version 
+        to keep the app 100% offline without HuggingFace dependencies.
         """
-        print(f"Inizio trascrizione di {audio_file}...")
+        print(f"Starting transcription of {audio_file}...")
         
-        # Trascrizione con faster-whisper
+        # Transcription with faster-whisper
         segments_generator, info = self.model.transcribe(
             audio_file, 
             language=language,
             beam_size=5,
-            vad_filter=True # Usa VAD per ignorare i silenzi
+            vad_filter=True # Use VAD to ignore silence
         )
         
         segments = []
         full_text = []
         
-        # Itera sul generatore per ottenere i segmenti
+        # Iterate over generator to get segments
         for i, segment in enumerate(segments_generator):
             seg_dict = {
                 'id': str(i),
                 'start': segment.start,
                 'end': segment.end,
                 'text': segment.text.strip(),
-                'confidence': segment.avg_logprob, # Non è esattamente la confidenza ma un proxy
-                'speaker': 'Speaker 1' # Default, senza diarization esterna
+                'confidence': segment.avg_logprob, # Not exactly confidence but a proxy
+                'speaker': 'Speaker 1' # Default, without external diarization
             }
             segments.append(seg_dict)
             full_text.append(segment.text.strip())
@@ -64,13 +64,13 @@ class WhisperInference:
                 progress_callback(min(progress, 0.95), list(segments))
 
         if diarization:
-            print("NOTA: Speaker Diarization avanzata (pyannote) è stata disabilitata per mantenere l'app 100% offline.")
-            print("Tutti i segmenti verranno assegnati a 'Speaker 1'.")
+            print("NOTE: Advanced Speaker Diarization (pyannote) has been disabled to keep the app 100% offline.")
+            print("All segments will be assigned to 'Speaker 1'.")
 
         return {
-            'text': ' '.join(full_text),
-            'segments': segments,
-            'language': info.language,
-            'language_probability': info.language_probability
+            'text': ' '.join(full_text) if full_text else "",
+            'segments': segments if segments else [],
+            'language': getattr(info, 'language', 'unknown'),
+            'language_probability': getattr(info, 'language_probability', 0.0)
         }
 

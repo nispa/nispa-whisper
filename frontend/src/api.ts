@@ -82,3 +82,17 @@ export async function reuploadMedia(projectId: string, file: File) {
   if (!res.ok) throw new Error(data.error || 'Failed to reupload media');
   return data;
 }
+
+export async function saveProjectSegments(projectId: string, segments: any[]) {
+  const res = await fetch(`${API_BASE}/projects/${projectId}/segments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ segments })
+  });
+  
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || 'Failed to save segments');
+  }
+  return res.json();
+}

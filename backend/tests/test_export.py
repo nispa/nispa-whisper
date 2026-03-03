@@ -3,7 +3,7 @@ import pytest
 from backend.transcribe.export import generate_mcp
 
 def test_generate_mcp_structure():
-    """Test che il formato MCP sia corretto e non ridondante"""
+    """Test that the MCP format is correct and non-redundant"""
     segments = [
         {"text": "Hello world", "start": 0.0, "end": 1.0},
         {"text": "Testing MCP", "start": 1.0, "end": 2.0}
@@ -13,20 +13,20 @@ def test_generate_mcp_structure():
     result_json = generate_mcp(segments, filename)
     data = json.loads(result_json)
     
-    # Verifica campi obbligatori
+    # Verify mandatory fields
     assert "mcp_version" in data
     assert "metadata" in data
     assert "text" in data
     
-    # Verifica metadati
+    # Verify metadata
     assert data["metadata"]["source"] == filename
     assert data["metadata"]["segments_count"] == 2
     assert data["metadata"]["total_characters"] == len("Hello world Testing MCP")
     
-    # Verifica contenuto (deve essere una stringa unica)
+    # Verify content (must be a single string)
     assert data["text"] == "Hello world Testing MCP"
     
-    # Verifica assenza di campi ridondanti o non richiesti
+    # Verify absence of redundant or unrequested fields
     assert "segments" not in data
     assert "content" not in data
     assert "full_text" not in data

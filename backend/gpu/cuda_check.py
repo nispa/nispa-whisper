@@ -1,7 +1,7 @@
 import torch
 
 def get_gpu_info():
-    """Ritorna la disponibilità della GPU e le specifiche"""
+    """Returns GPU availability and specs"""
     cuda_available = torch.cuda.is_available()
     
     if not cuda_available:
@@ -9,7 +9,7 @@ def get_gpu_info():
         
     device_name = torch.cuda.get_device_name(0)
     
-    # Ottieni la memoria totale e libera in GB
+    # Get total and free memory in GB
     try:
         vram_total = torch.cuda.get_device_properties(0).total_memory / (1024**3)
         vram_free = torch.cuda.mem_get_info()[0] / (1024**3)
@@ -26,12 +26,6 @@ def get_gpu_info():
     }
 
 def optimize_for_whisper(model_size, vram_gb):
-    """
-    Seleziona il compute_type ottimale in base alla VRAM.
-    RTX 4500 Ada (24GB) -> float16 (miglior bilanciamento)
-    RTX 4060 (8GB) -> int8 (quantizzato, più lento ma entra in memoria)
-    CPU only -> float32
-    """
     if vram_gb < 4:
         return 'cpu', 'float32'
     elif vram_gb < 8:

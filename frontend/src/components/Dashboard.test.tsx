@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
+// Ora puntiamo alla cartella Dashboard (che contiene index.tsx)
 import Dashboard from './Dashboard';
 
 // Mock delle traduzioni
@@ -9,7 +10,7 @@ const mockT = (key: string) => key;
 vi.mock('../api', () => ({
   getProjects: vi.fn(() => Promise.resolve([])),
   deleteProject: vi.fn(() => Promise.resolve({ success: true })),
-  clearAllData: vi.fn(() => Promise.resolve({ success: true })),
+  getProjectDetails: vi.fn(() => Promise.resolve({ segments: [] })),
 }));
 
 describe('Dashboard Component', () => {
@@ -22,9 +23,8 @@ describe('Dashboard Component', () => {
       />
     );
     
-    // Verifica che il titolo o un elemento chiave sia presente
-    // Nota: usiamo i tasti di traduzione come mock
-    expect(screen.getByText('app.projects')).toBeDefined();
+    // Il Dashboard ora cerca "dashboard.recentProjects" come titolo
+    expect(screen.getByText('dashboard.recentProjects')).toBeDefined();
   });
 
   it('shows the new project button', () => {

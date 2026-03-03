@@ -100,12 +100,16 @@ export const translations = {
       modelsTiny: 'Veloce (Tiny): Modelli molto veloci, ideali per test o audio molto chiari.',
       modelsSmall: 'Small / Medium: Il miglior compromesso tra velocità e precisione. Medium è il modello consigliato per la maggior parte degli usi.',
       modelsLarge: 'Large-v3: La massima precisione possibile, ma richiede più tempo e più memoria video (VRAM).',
-      editorTitle: '2. Editor e Correzioni',
+      diarizationTitle: '2. Identificazione Parlanti',
+      diarizationIntro: 'La funzione di Diarization permette di distinguere chi sta parlando nel file audio.',
+      diarizationNote: 'Nota: Questa funzione richiede più risorse computazionali e potrebbe rallentare il processo iniziale.',
+      editorTitle: '3. Editor e Correzioni',
       editorIntro: 'Una volta completata la trascrizione, entrerai nell\'Editor.',
       editorPoint1: 'Clicca su qualsiasi blocco di testo per modificarlo.',
       editorPoint2: 'Il video/audio si sincronizzerà automaticamente con il testo selezionato.',
       editorPoint3: 'Usa la Waveform in basso a sinistra per navigare rapidamente nel file.',
-      exportTitle: '3. Salvataggio ed Esportazione',
+      editorPoint4: 'Il sistema salva automaticamente le modifiche nel database locale.',
+      exportTitle: '4. Salvataggio ed Esportazione',
       exportIntro: 'Il tuo progetto viene salvato automaticamente nel database locale. Puoi tornare alla schermata principale e riprenderlo in seguito.',
       exportPoint1: 'Clicca su ESPORTA per scaricare il file nel formato desiderato (SRT, VTT, TXT, CSV, JSON).',
       exportPoint2: 'Usa il pulsante COPIA per copiare rapidamente l\'intera trascrizione negli appunti. Il formato JSON (MCP) è ottimizzato per essere utilizzato con servizi AI esterni (Gemini, ChatGPT, Claude) per analisi, riassunti o traduzioni. Puoi configurare le tue API Key nelle Impostazioni.',
@@ -114,13 +118,22 @@ export const translations = {
       close: 'Chiudi'
     },
     settings: {
+      title: 'Impostazioni',
       defaultModel: 'Modello Predefinito',
       defaultLanguage: 'Lingua Predefinita',
       defaultDiarization: 'Diarization Predefinita',
       defaultDiarizationDesc: 'Identifica i parlanti di default',
       cancel: 'Annulla',
       save: 'Salva',
-      interfaceLanguage: 'Lingua Interfaccia'
+      interfaceLanguage: 'Lingua Interfaccia',
+      transcriptionTitle: 'Configurazione Trascrizione',
+      languages: {
+        it: 'Italiano',
+        en: 'English',
+        fr: 'Francese',
+        es: 'Spagnolo',
+        de: 'Tedesco'
+      }
     }
   },
   en: {
@@ -218,12 +231,16 @@ export const translations = {
       modelsTiny: 'Tiny / Base: Very fast models, ideal for testing or very clear audio.',
       modelsSmall: 'Small / Medium: The best compromise between speed and precision. Medium is the recommended model for most uses.',
       modelsLarge: 'Large-v3: The maximum precision possible, but requires more time and more video memory (VRAM).',
-      editorTitle: '2. Editor and Corrections',
+      diarizationTitle: '2. Speaker Identification',
+      diarizationIntro: 'Diarization allows you to distinguish different speakers in the audio file.',
+      diarizationNote: 'Note: This feature requires more computational resources and may slow down the initial process.',
+      editorTitle: '3. Editor and Corrections',
       editorIntro: 'Once the transcription is complete, you will enter the Editor.',
       editorPoint1: 'Click on any block of text to edit it.',
       editorPoint2: 'The video/audio will automatically sync with the selected text.',
       editorPoint3: 'Use the Waveform at the bottom left to quickly navigate the file.',
-      exportTitle: '3. Saving and Exporting',
+      editorPoint4: 'The system automatically saves changes to the local database.',
+      exportTitle: '4. Saving and Exporting',
       exportIntro: 'Your project is automatically saved in the local database. You can return to the main screen and resume it later.',
       exportPoint1: 'Click EXPORT to download the file in the desired format (SRT, VTT, TXT, CSV, JSON).',
       exportPoint2: 'Use the COPY button to quickly copy the entire transcription to the clipboard. The JSON (MCP) format is optimized for use with external AI services (Gemini, ChatGPT, Claude) for analysis, summaries, or translations. You can configure your API Keys in Settings.',
@@ -232,13 +249,22 @@ export const translations = {
       close: 'Close'
     },
     settings: {
+      title: 'Settings',
       defaultModel: 'Default Model',
       defaultLanguage: 'Default Language',
       defaultDiarization: 'Default Diarization',
       defaultDiarizationDesc: 'Identify speakers by default',
       cancel: 'Cancel',
       save: 'Save',
-      interfaceLanguage: 'Interface Language'
+      interfaceLanguage: 'Interface Language',
+      transcriptionTitle: 'Transcription Config',
+      languages: {
+        it: 'Italian (Italiano)',
+        en: 'English',
+        fr: 'French (Français)',
+        es: 'Spanish (Español)',
+        de: 'German (Deutsch)'
+      }
     }
   }
 };

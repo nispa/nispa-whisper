@@ -3,10 +3,10 @@ import csv
 import io
 
 def format_timecode(ms, mode='standard'):
-    """Converte millisecondi in formato HH:MM:SS,mmm o SMPTE"""
+    """Converts milliseconds to HH:MM:SS,mmm or SMPTE format"""
     if mode == 'smpte':
-        # SMPTE: HH:MM:SS:FF (frame, richiede framerate)
-        # Implementazione base, assumendo 25fps
+        # SMPTE: HH:MM:SS:FF (frame, requires framerate)
+        # Basic implementation, assuming 25fps
         ms = int(ms)
         h = (ms // 3_600_000)
         m = (ms % 3_600_000) // 60_000
@@ -31,7 +31,7 @@ def format_timecode(ms, mode='standard'):
         return f"{h:02d}:{m:02d}:{s:02d},{ms_rem:03d}"
 
 def generate_srt(segments, speaker_labels=True, timecode_mode='standard'):
-    """Genera il file SRT (SubRip)"""
+    """Generates the SRT (SubRip) file"""
     lines = []
     
     for idx, seg in enumerate(segments, 1):
@@ -49,7 +49,7 @@ def generate_srt(segments, speaker_labels=True, timecode_mode='standard'):
     return "\n".join(lines)
 
 def generate_vtt(segments, speaker_labels=True):
-    """Genera il file WebVTT"""
+    """Generates the WebVTT file"""
     lines = ["WEBVTT\n"]
     
     for idx, seg in enumerate(segments, 1):
@@ -67,7 +67,7 @@ def generate_vtt(segments, speaker_labels=True):
     return "\n".join(lines)
 
 def generate_txt(segments, speaker_labels=True):
-    """Genera un file di testo semplice"""
+    """Generates a plain text file"""
     lines = []
     current_speaker = None
     
@@ -84,7 +84,7 @@ def generate_txt(segments, speaker_labels=True):
     return "\n".join(lines).strip()
 
 def generate_csv(segments, speaker_labels=True):
-    """Genera un file CSV"""
+    """Generates a CSV file"""
     output = io.StringIO()
     writer = csv.writer(output)
     
@@ -107,11 +107,11 @@ def generate_csv(segments, speaker_labels=True):
     return output.getvalue()
 
 def generate_json(segments):
-    """Genera un output JSON strutturato"""
+    """Generates a structured JSON output"""
     return json.dumps({"segments": segments}, indent=2, ensure_ascii=False)
 
 def generate_mcp(segments, filename=""):
-    """Genera un output in formato MCP (Model Context Protocol) per servizi AI"""
+    """Generates an MCP (Model Context Protocol) format output for AI services"""
     full_text = " ".join([seg['text'].strip() for seg in segments])
     
     return json.dumps({

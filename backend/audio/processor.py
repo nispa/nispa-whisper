@@ -3,15 +3,15 @@ import os
 
 def prepare_audio(video_file, output_wav):
     """
-    Estrae l'audio dal video e lo ricampiona a 16kHz (requisito di Whisper).
-    Usa FFmpeg tramite subprocess.
+    Extracts audio from video and resamples it to 16kHz (Whisper requirement).
+    Uses FFmpeg via subprocess.
     """
-    print(f"Preparazione audio da {video_file} a {output_wav}...")
+    print(f"Preparing audio from {video_file} to {output_wav}...")
     
-    # Assicurati che ffmpeg sia nel PATH o specifica il percorso assoluto
+    # Ensure ffmpeg is in PATH or specify the absolute path
     cmd = [
         'ffmpeg',
-        '-y', # Sovrascrive il file se esiste
+        '-y', # Overwrite file if exists
         '-i', video_file,
         '-acodec', 'pcm_s16le',
         '-ar', '16000', # 16kHz resample (Whisper requirement)
@@ -21,7 +21,7 @@ def prepare_audio(video_file, output_wav):
     
     try:
         subprocess.run(cmd, check=True, capture_output=True)
-        print("Estrazione audio completata.")
+        print("Audio extraction completed.")
     except subprocess.CalledProcessError as e:
-        print(f"Errore FFmpeg: {e.stderr.decode()}")
-        raise RuntimeError("Impossibile estrarre l'audio dal file fornito. Assicurati che FFmpeg sia installato.")
+        print(f"FFmpeg Error: {e.stderr.decode()}")
+        raise RuntimeError("Unable to extract audio from the provided file. Ensure FFmpeg is installed.")

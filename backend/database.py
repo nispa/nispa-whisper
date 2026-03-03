@@ -7,7 +7,8 @@ DB_PATH = os.path.join(os.path.dirname(__file__), '../data/whisperapp.db')
 
 def get_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30)
+    conn.execute('PRAGMA journal_mode=WAL') # Enable Write-Ahead Logging
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -24,6 +25,9 @@ def init_db():
             file_name TEXT,
             model TEXT,
             language TEXT,
+            detected_language TEXT,
+            language_probability REAL,
+            full_text TEXT,
             diarization BOOLEAN,
             progress REAL,
             error TEXT,
@@ -31,11 +35,16 @@ def init_db():
         )
     ''')
     
-    # Add file_hash column if it doesn't exist (for existing databases)
-    try:
+    # Migration for existing databases
+    columns = [row[1] for row in c.execute('PRAGMA table_info(projects)')]
+    if 'detected_language' not in columns:
+        c.execute('ALTER TABLE projects ADD COLUMN detected_language TEXT')
+    if 'language_probability' not in columns:
+        c.execute('ALTER TABLE projects ADD COLUMN language_probability REAL')
+    if 'full_text' not in columns:
+        c.execute('ALTER TABLE projects ADD COLUMN full_text TEXT')
+    if 'file_hash' not in columns:
         c.execute('ALTER TABLE projects ADD COLUMN file_hash TEXT')
-    except sqlite3.OperationalError:
-        pass # Column already exists
         
     c.execute('''
         CREATE TABLE IF NOT EXISTS segments (
@@ -51,13 +60,24 @@ def init_db():
     conn.commit()
     conn.close()
 
-def create_project(project_id, name, file_path, file_name, model, language, diarization, file_hash=None):
+def create_project(project_id, name, file_path, file_name, model, language, diarization=False, file_hash=None):
     conn = get_db()
     c = conn.cursor()
     c.execute('''
         INSERT INTO projects (id, name, created_at, status, file_path, file_name, model, language, diarization, progress, file_hash)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (project_id, name, datetime.now().isoformat(), 'queued', file_path, file_name, model, language, diarization, 0.0, file_hash))
+    conn.commit()
+    conn.close()
+
+def update_project_metadata(project_id, detected_language, language_probability, full_text):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute('''
+        UPDATE projects 
+        SET detected_language = ?, language_probability = ?, full_text = ? 
+        WHERE id = ?
+    ''', (detected_language, language_probability, full_text, project_id))
     conn.commit()
     conn.close()
 
@@ -74,16 +94,29 @@ def update_project_status(project_id, status, progress=None, error=None):
     conn.close()
 
 def save_segments(project_id, segments):
+    if not isinstance(segments, list):
+        print(f"Error: segments is not a list, it is {type(segments)}")
+        return
+
     conn = get_db()
-    c = conn.cursor()
-    c.execute('DELETE FROM segments WHERE project_id = ?', (project_id,))
-    for seg in segments:
-        c.execute('''
-            INSERT INTO segments (project_id, start, end, text, speaker)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (project_id, seg.get('start', 0), seg.get('end', 0), seg.get('text', ''), seg.get('speaker', '')))
-    conn.commit()
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute('DELETE FROM segments WHERE project_id = ?', (project_id,))
+        for seg in segments:
+            # Protection: if seg is a string (rare but possible error), transform it into a dict
+            if isinstance(seg, str):
+                seg = {'text': seg, 'start': 0, 'end': 0, 'speaker': 'Unknown'}
+            
+            c.execute('''
+                INSERT INTO segments (project_id, start, end, text, speaker)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (project_id, seg.get('start', 0), seg.get('end', 0), seg.get('text', ''), seg.get('speaker', '')))
+        conn.commit()
+    except Exception as e:
+        print(f"Error during save_segments: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
 
 def get_project(project_id):
     conn = get_db()
@@ -116,13 +149,35 @@ def get_segments(project_id):
         result.append(d)
     return result
 
+def update_project_file(project_id, file_path, file_name, file_hash=None):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute('''
+        UPDATE projects 
+        SET file_path = ?, file_name = ?, file_hash = ? 
+        WHERE id = ?
+    ''', (file_path, file_name, file_hash, project_id))
+    conn.commit()
+    conn.close()
+
 def delete_project(project_id):
     conn = get_db()
     c = conn.cursor()
+    
+    # Retrieve file path before deleting the project
+    c.execute('SELECT file_path FROM projects WHERE id = ?', (project_id,))
+    row = c.fetchone()
+    if row and row['file_path'] and os.path.exists(row['file_path']):
+        try:
+            os.remove(row['file_path'])
+        except Exception as e:
+            print(f"Error during file deletion {row['file_path']}: {e}")
+
     c.execute('DELETE FROM projects WHERE id = ?', (project_id,))
     c.execute('DELETE FROM segments WHERE project_id = ?', (project_id,))
     conn.commit()
     conn.close()
+    return True
 
 def clear_all_data():
     conn = get_db()

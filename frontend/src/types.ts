@@ -6,6 +6,9 @@ export interface Project {
   date: string;
   duration: string;
   language: string;
+  detected_language?: string;
+  language_probability?: number;
+  full_text?: string;
   speakers: number;
   thumbnail?: string;
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Settings2, X } from 'lucide-react';
 import { TranscriptionJob } from '../../types';
-import { startTranscription } from '../../api';
+import { startTranscription, getAudioPreview } from '../../api';
 import FileUpload from './FileUpload';
 import ModelSelector from './ModelSelector';
 import LanguageSelector from './LanguageSelector';
@@ -18,16 +18,32 @@ export default function Setup({ initialJob, onStart, onCancel, t }: SetupProps) 
   const [job, setJob] = useState<TranscriptionJob>(initialJob);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isPreviewing, setIsPreviewing] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const handlePreview = async () => {
+    if (!job.file) return;
+    setIsPreviewing(true);
+    setError(null);
+    try {
+      const url = await getAudioPreview(job.file, true);
+      setPreviewUrl(url);
+    } catch (e: any) {
+      setError(e.message || t('setup.unknownError'));
+    } finally {
+      setIsPreviewing(false);
+    }
+  };
 
   const handleStart = async () => {
     if (!job.file) return;
     setIsSubmitting(true);
     setError(null);
     try {
-      const data = await startTranscription(job.file, job.model, job.language);
+      const data = await startTranscription(job.file, job.model, job.language, job.normalize || false);
       onStart({ ...job, id: data.job_id });
     } catch (e: any) {
-      const msg = e.message === 'Failed to fetch' 
+      const msg = e.message === 'Failed to fetch'
         ? t('setup.connectionError')
         : e.message;
       setError(msg || t('setup.unknownError'));
@@ -55,13 +71,13 @@ export default function Setup({ initialJob, onStart, onCancel, t }: SetupProps) 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column: File Upload */}
           <div className="space-y-6">
-            <FileUpload 
-              file={job.file} 
+            <FileUpload
+              file={job.file}
               onFileChange={(file) => {
                 setJob({ ...job, file });
                 setError(null);
-              }} 
-              t={t} 
+              }}
+              t={t}
             />
           </div>
 
@@ -74,25 +90,66 @@ export default function Setup({ initialJob, onStart, onCancel, t }: SetupProps) 
               </h3>
 
               <div className="space-y-6">
-                <ModelSelector 
-                  selectedModel={job.model} 
-                  onModelChange={(model) => setJob({ ...job, model })} 
-                  t={t} 
+                <ModelSelector
+                  selectedModel={job.model}
+                  onModelChange={(model) => setJob({ ...job, model })}
+                  t={t}
                 />
-                
-                <LanguageSelector 
-                  language={job.language} 
-                  onLanguageChange={(language) => setJob({ ...job, language })} 
-                  t={t} 
+
+                <LanguageSelector
+                  language={job.language}
+                  onLanguageChange={(language) => setJob({ ...job, language })}
+                  t={t}
                 />
+
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-medium text-white">{t('setup.normalizeAudio')}</h4>
+                      <p className="text-xs text-gray-400 mt-1">{t('setup.normalizeDesc')}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setJob({ ...job, normalize: !job.normalize })}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${job.normalize ? 'bg-blue-600' : 'bg-gray-700'}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${job.normalize ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
+                  </div>
+
+                  {job.normalize && job.file && (
+                    <div className="mt-4 p-4 border border-blue-500/30 bg-blue-500/5 rounded-lg">
+                      <button
+                        onClick={handlePreview}
+                        disabled={isPreviewing}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#333] text-white rounded-md text-sm font-medium transition-colors disabled:opacity-50"
+                      >
+                        {isPreviewing ? t('setup.previewing') : t('setup.preview')}
+                      </button>
+
+                      {previewUrl && (
+                        <div className="mt-4 space-y-4">
+                          <div>
+                            <span className="text-xs text-gray-400 block mb-1">{t('setup.previewOriginal')}</span>
+                            <audio controls className="w-full h-8" src={URL.createObjectURL(job.file)} />
+                          </div>
+                          <div>
+                            <span className="text-xs text-blue-400 block mb-1">{t('setup.previewNormalized')}</span>
+                            <audio controls className="w-full h-8" src={previewUrl} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <ActionButton 
-              isDisabled={!job.file} 
-              isLoading={isSubmitting} 
-              onClick={handleStart} 
-              t={t} 
+            <ActionButton
+              isDisabled={!job.file}
+              isLoading={isSubmitting}
+              onClick={handleStart}
+              t={t}
             />
           </div>
         </div>

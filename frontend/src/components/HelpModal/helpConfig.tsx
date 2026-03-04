@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileAudio, Settings2, Edit3, Download, Cpu } from 'lucide-react';
+import { FileAudio, Volume2, Edit3, Download, Cpu } from 'lucide-react';
 
 export interface HelpSectionConfig {
   id: string;
@@ -26,13 +26,13 @@ export const helpConfig: HelpSectionConfig[] = [
     }
   },
   {
-    id: 'diarization',
-    titleKey: 'help.diarizationTitle',
-    icon: <Settings2 size={20} />,
+    id: 'normalization',
+    titleKey: 'help.normalizationTitle',
+    icon: <Volume2 size={20} />,
     colorClass: 'text-emerald-400',
     content: {
-      introKey: 'help.diarizationIntro',
-      noteKey: 'help.diarizationNote'
+      introKey: 'help.normalizationIntro',
+      noteKey: 'help.normalizationNote'
     }
   },
   {

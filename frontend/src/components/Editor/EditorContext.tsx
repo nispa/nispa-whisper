@@ -12,6 +12,7 @@ interface EditorContextType {
   isPlaying: boolean;
   currentTime: number;
   duration: number;
+  seekRequest: { time: number; timestamp: number } | null;
   loading: boolean;
   isSaving: boolean;
   modifiedIds: Set<string>;
@@ -61,6 +62,7 @@ export function EditorProvider({
   const [mediaError, setMediaError] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [mediaUpdated, setMediaUpdated] = useState(Date.now());
+  const [seekRequest, setSeekRequest] = useState<{ time: number; timestamp: number } | null>(null);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -93,7 +95,7 @@ export function EditorProvider({
   }, []);
 
   const handleSeek = (time: number) => {
-    setCurrentTime(time);
+    setSeekRequest({ time, timestamp: Date.now() });
   };
 
   const togglePlay = () => setIsPlaying(!isPlaying);
@@ -139,6 +141,7 @@ export function EditorProvider({
     isPlaying,
     currentTime,
     duration,
+    seekRequest,
     loading,
     isSaving,
     modifiedIds,

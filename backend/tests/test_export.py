@@ -1,6 +1,6 @@
 import json
 import pytest
-from backend.transcribe.export import generate_mcp
+from transcribe.export import generate_mcp
 
 def test_generate_mcp_structure():
     """Test that the MCP format is correct and non-redundant"""

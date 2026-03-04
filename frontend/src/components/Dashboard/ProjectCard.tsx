@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Clock, Play, Trash2 } from 'lucide-react';
+import { FileText, Clock, Play, Trash2, Volume2 } from 'lucide-react';
 
 interface ProjectCardProps {
   project: any;
@@ -10,7 +10,7 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project: p, onDelete, onResume, t }: ProjectCardProps) {
   return (
-    <div 
+    <div
       onClick={() => onResume(p)}
       className="bg-[#1e1e1e] border border-gray-800 hover:border-blue-500/50 rounded-xl p-6 cursor-pointer transition-all group hover:shadow-lg hover:shadow-blue-500/10 relative"
     >
@@ -22,7 +22,7 @@ export default function ProjectCard({ project: p, onDelete, onResume, t }: Proje
           <span className={`text-xs font-mono px-2 py-1 rounded ${p.status === 'completed' ? 'text-green-500 bg-green-900/30' : p.status === 'failed' ? 'text-red-500 bg-red-900/30' : 'text-yellow-500 bg-yellow-900/30'}`}>
             {p.status.toUpperCase()}
           </span>
-          <button 
+          <button
             onClick={(e) => onDelete(e, p.id)}
             className="text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
           >
@@ -42,6 +42,11 @@ export default function ProjectCard({ project: p, onDelete, onResume, t }: Proje
           <Play size={14} />
           <span>{p.model}</span>
         </div>
+        {!!p.normalized && (
+          <div className="flex items-center gap-1.5 text-blue-400" title="Audio Normalizzato">
+            <Volume2 size={14} />
+          </div>
+        )}
       </div>
     </div>
   );

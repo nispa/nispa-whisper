@@ -17,8 +17,7 @@ export default function Transcribing({ job, onComplete, onCancel, t }: Transcrib
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [liveSegments, setLiveSegments] = useState<Segment[]>([]);
-  const totalChunks = 24;
-  const [chunks, setChunks] = useState(Array(totalChunks).fill({ status: 'pending' }));
+  const [logs, setLogs] = useState<string[]>([]);
 
   useEffect(() => {
     if (!job.id) {
@@ -34,20 +33,14 @@ export default function Transcribing({ job, onComplete, onCancel, t }: Transcrib
 
         const currentProgress = (data.progress || 0) * 100;
         setProgress(currentProgress);
-        
+
         if (data.segments && data.segments.length > 0) {
           setLiveSegments(data.segments);
         }
-        
-        // Update visual chunks logic
-        const completedCount = Math.floor((currentProgress / 100) * totalChunks);
-        const processingIdx = completedCount < totalChunks ? completedCount : -1;
 
-        setChunks(prev => prev.map((_, i) => {
-          if (i < completedCount) return { status: 'done' };
-          if (i === processingIdx) return { status: 'processing' };
-          return { status: 'pending' };
-        }));
+        if (data.logs && Array.isArray(data.logs)) {
+          setLogs(data.logs);
+        }
 
         if (data.status === 'completed') {
           clearInterval(interval);
@@ -75,19 +68,20 @@ export default function Transcribing({ job, onComplete, onCancel, t }: Transcrib
       <SidebarInfo job={job} t={t} />
 
       <div className="flex-1 flex flex-col bg-[#141414] p-8 overflow-y-auto">
-        <ProgressSection 
-          progress={progress} 
-          error={error} 
-          onCancel={onCancel} 
-          t={t} 
+        <ProgressSection
+          progress={progress}
+          error={error}
+          onCancel={onCancel}
+          onGoToEditor={() => onComplete(liveSegments)}
+          t={t}
         />
 
-        <TimelineSection chunks={chunks} t={t} />
+        <TimelineSection progress={progress} isError={error !== null} t={t} logs={logs} />
 
-        <LivePreview 
-          segments={liveSegments} 
-          progress={progress} 
-          t={t} 
+        <LivePreview
+          segments={liveSegments}
+          progress={progress}
+          t={t}
         />
       </div>
     </div>

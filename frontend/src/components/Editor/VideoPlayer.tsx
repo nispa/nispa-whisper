@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
 import { useEditor } from './EditorContext';
 import { API_BASE } from '../../api';
@@ -16,6 +16,7 @@ export default function VideoPlayer({ t }: VideoPlayerProps) {
     setIsPlaying,
     setCurrentTime,
     setDuration,
+    seekRequest,
     handleSeek,
     togglePlay,
     editingId,
@@ -31,6 +32,18 @@ export default function VideoPlayer({ t }: VideoPlayerProps) {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isSeekingRef = useRef<boolean>(false);
+  const [videoSrc, setVideoSrc] = useState<string>('');
+
+  useEffect(() => {
+    if (job.file instanceof File) {
+      const url = URL.createObjectURL(job.file);
+      setVideoSrc(url);
+      return () => URL.revokeObjectURL(url);
+    } else if (job.id) {
+      setVideoSrc(`${API_BASE}/projects/${job.id}/media?t=${mediaUpdated}`);
+    }
+  }, [job.file, job.id, mediaUpdated]);
 
   const handleReupload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,6 +64,8 @@ export default function VideoPlayer({ t }: VideoPlayerProps) {
     if (!video) return;
 
     const handleTimeUpdate = () => {
+      if (isSeekingRef.current) return; // Prevent old time updates during a seek operation
+
       setCurrentTime(video.currentTime);
 
       // Logica di pausa a fine segmento durante l'editing
@@ -74,11 +89,17 @@ export default function VideoPlayer({ t }: VideoPlayerProps) {
       }
     };
 
+    const handleSeeked = () => {
+      isSeekingRef.current = false;
+    };
+
     video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('seeked', handleSeeked);
     video.addEventListener('loadedmetadata', () => setDuration(video.duration));
 
     return () => {
       video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('seeked', handleSeeked);
     };
   }, [editingId, segments, activeSegmentId, isPlaying]);
 
@@ -89,12 +110,13 @@ export default function VideoPlayer({ t }: VideoPlayerProps) {
     else if (!isPlaying && !videoRef.current.paused) videoRef.current.pause();
   }, [isPlaying]);
 
-  // Gestione seek esterno (es. click su waveform)
+  // Gestione seek esterno
   useEffect(() => {
-    if (videoRef.current && Math.abs(videoRef.current.currentTime - currentTime) > 0.5) {
-      videoRef.current.currentTime = currentTime;
+    if (videoRef.current && seekRequest !== null) {
+      videoRef.current.currentTime = seekRequest.time;
+      setCurrentTime(seekRequest.time); // Eagerly update UI
     }
-  }, [currentTime]);
+  }, [seekRequest]);
 
   return (
     <div className="aspect-video bg-black relative flex items-center justify-center group overflow-hidden">
@@ -126,7 +148,7 @@ export default function VideoPlayer({ t }: VideoPlayerProps) {
         <video
           ref={videoRef}
           className="w-full h-full object-contain"
-          src={job.file instanceof File ? URL.createObjectURL(job.file) : `${API_BASE}/projects/${job.id}/media?t=${mediaUpdated}`}
+          src={videoSrc}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onError={() => setMediaError(true)}

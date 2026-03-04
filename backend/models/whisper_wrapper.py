@@ -3,7 +3,7 @@ from faster_whisper import WhisperModel
 import torch
 
 class WhisperInference:
-    def __init__(self, model_name="medium", device="cuda", compute_type="float16"):
+    def __init__(self, model_name="medium", device="cuda", compute_type="float16", log_callback=None):
         """
         model_name: tiny, base, small, medium, large-v3
         device: cuda, cpu
@@ -12,26 +12,39 @@ class WhisperInference:
         self.model_name = model_name
         self.device = device
         self.compute_type = compute_type
+        self.log_callback = log_callback
+        
+        def log(msg):
+            print(msg)
+            if self.log_callback:
+                self.log_callback(msg)
         
         # Load the model in the local data/models folder for portability
         model_dir = os.path.join(os.path.dirname(__file__), '../../data/models')
         os.makedirs(model_dir, exist_ok=True)
         
-        print(f"Loading {model_name} model on {device} with {compute_type}...")
+        log(f"Loading {model_name} model on {device} with {compute_type}...")
         self.model = WhisperModel(
             model_name, 
             device=device, 
             compute_type=compute_type,
             download_root=model_dir
         )
-        print("Model loaded successfully.")
+        log("Model loaded successfully.")
 
-    def transcribe(self, audio_file, language=None, diarization=False, progress_callback=None):
+    def transcribe(self, audio_file, language=None, diarization=False, progress_callback=None, log_callback=None):
         """
         Executes transcription. Advanced diarization is disabled in this version 
         to keep the app 100% offline without HuggingFace dependencies.
         """
-        print(f"Starting transcription of {audio_file}...")
+        def log(msg):
+            print(msg)
+            if log_callback:
+                log_callback(msg)
+            elif self.log_callback:
+                self.log_callback(msg)
+                
+        log(f"Starting transcription of {audio_file}...")
         
         # Transcription with faster-whisper
         segments_generator, info = self.model.transcribe(
@@ -56,7 +69,7 @@ class WhisperInference:
             }
             segments.append(seg_dict)
             full_text.append(segment.text.strip())
-            print(f"[{segment.start:.2f}s -> {segment.end:.2f}s] {segment.text}")
+            # print(f"[{segment.start:.2f}s -> {segment.end:.2f}s] {segment.text}")
             
             if progress_callback and info.duration > 0:
                 # Calculate progress based on audio duration (from 30% to 95%)
@@ -64,8 +77,8 @@ class WhisperInference:
                 progress_callback(min(progress, 0.95), list(segments))
 
         if diarization:
-            print("NOTE: Advanced Speaker Diarization (pyannote) has been disabled to keep the app 100% offline.")
-            print("All segments will be assigned to 'Speaker 1'.")
+            log("NOTE: Advanced Speaker Diarization (pyannote) has been disabled to keep the app 100% offline.")
+            log("All segments will be assigned to 'Speaker 1'.")
 
         return {
             'text': ' '.join(full_text) if full_text else "",

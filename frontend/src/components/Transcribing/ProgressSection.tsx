@@ -5,10 +5,11 @@ interface ProgressSectionProps {
   progress: number;
   error: string | null;
   onCancel: () => void;
+  onGoToEditor?: () => void;
   t: (key: string) => string;
 }
 
-export default function ProgressSection({ progress, error, onCancel, t }: ProgressSectionProps) {
+export default function ProgressSection({ progress, error, onCancel, onGoToEditor, t }: ProgressSectionProps) {
   return (
     <div className="max-w-3xl mx-auto w-full mb-12">
       {error ? (
@@ -44,9 +45,9 @@ export default function ProgressSection({ progress, error, onCancel, t }: Progre
               {Math.round(progress)}%
             </div>
           </div>
-          
+
           <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full bg-blue-500 transition-all duration-300 ease-out relative"
               style={{ width: `${progress}%` }}
             >
@@ -56,13 +57,21 @@ export default function ProgressSection({ progress, error, onCancel, t }: Progre
         </>
       )}
 
-      <div className="mt-6 flex justify-end">
-        <button 
+      <div className="mt-6 flex justify-end gap-3">
+        {progress >= 100 && !error && onGoToEditor && (
+          <button
+            onClick={onGoToEditor}
+            className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors font-medium shadow-lg shadow-blue-500/20"
+          >
+            Vai all'Editor →
+          </button>
+        )}
+        <button
           onClick={onCancel}
           className="flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors font-medium"
         >
           <XCircle size={18} />
-          {error ? t('transcribing.goBack') : t('transcribing.cancel')}
+          {error || progress >= 100 ? t('transcribing.goBack') : t('transcribing.cancel')}
         </button>
       </div>
     </div>

@@ -7,7 +7,7 @@ import EmptyState from './EmptyState';
 
 interface DashboardProps {
   onNewProject: () => void;
-  onResumeProject: (job: TranscriptionJob, segments: Segment[]) => void;
+  onResumeProject: (job: TranscriptionJob, segments: Segment[], status?: string) => void;
   t: (key: string) => string;
 }
 
@@ -47,12 +47,12 @@ export default function Dashboard({ onNewProject, onResumeProject, t }: Dashboar
   const handleResume = (p: any) => {
     const job: TranscriptionJob = {
       id: p.id,
-      file: null, 
+      file: null,
       model: p.model,
       language: p.language,
       saveLocation: ''
     };
-    onResumeProject(job, []);
+    onResumeProject(job, [], p.status);
   };
 
   return (
@@ -60,7 +60,7 @@ export default function Dashboard({ onNewProject, onResumeProject, t }: Dashboar
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-semibold text-white">{t('dashboard.recentProjects')}</h2>
-          <button 
+          <button
             onClick={onNewProject}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-lg shadow-blue-600/20"
           >
@@ -74,12 +74,12 @@ export default function Dashboard({ onNewProject, onResumeProject, t }: Dashboar
         ) : projects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map(p => (
-              <ProjectCard 
-                key={p.id} 
-                project={p} 
-                onDelete={handleDelete} 
-                onResume={handleResume} 
-                t={t} 
+              <ProjectCard
+                key={p.id}
+                project={p}
+                onDelete={handleDelete}
+                onResume={handleResume}
+                t={t}
               />
             ))}
           </div>

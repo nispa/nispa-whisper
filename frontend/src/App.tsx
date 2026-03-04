@@ -47,14 +47,14 @@ export default function App() {
     }
     setIsActionsOpen(false);
   };
-  
+
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
     const saved = localStorage.getItem('whisper_settings');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        return { 
-          ...parsed, 
+        return {
+          ...parsed,
           interfaceLanguage: parsed.interfaceLanguage || 'it',
           aiService: parsed.aiService || 'gemini',
           aiApiKey: parsed.aiApiKey || '',
@@ -62,7 +62,7 @@ export default function App() {
           aiCustomUrl: parsed.aiCustomUrl || '',
           aiMcpFormat: parsed.aiMcpFormat || 'mcp-1.0'
         };
-      } catch (e) {}
+      } catch (e) { }
     }
     return {
       defaultModel: 'medium',
@@ -96,7 +96,7 @@ export default function App() {
         });
       }
     };
-    
+
     fetchStatus();
     const interval = setInterval(fetchStatus, 5000);
     return () => clearInterval(interval);
@@ -108,7 +108,7 @@ export default function App() {
     language: appSettings.defaultLanguage,
     saveLocation: './data',
   });
-  
+
   const [segments, setSegments] = useState<Segment[]>([]);
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export default function App() {
         </div>
         <div className="flex items-center gap-4 relative">
           <div className="relative" ref={actionsRef}>
-            <button 
+            <button
               onClick={() => setIsActionsOpen(!isActionsOpen)}
               className="p-2 hover:bg-gray-800 rounded-md transition-colors text-gray-400 hover:text-white flex items-center gap-2"
               title={t('app.actions') || 'Azioni'}
@@ -161,7 +161,7 @@ export default function App() {
             </button>
             {isActionsOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-[#1e1e1e] border border-gray-800 rounded-lg shadow-xl z-50 overflow-hidden">
-                <button 
+                <button
                   onClick={handleClearCache}
                   className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-gray-800 hover:text-red-300 flex items-center gap-2 transition-colors"
                 >
@@ -171,13 +171,13 @@ export default function App() {
               </div>
             )}
           </div>
-          <button 
+          <button
             onClick={() => setIsSettingsOpen(true)}
             className="p-2 hover:bg-gray-800 rounded-md transition-colors text-gray-400 hover:text-white"
           >
             <Settings size={20} />
           </button>
-          <button 
+          <button
             onClick={() => setIsHelpOpen(true)}
             className="p-2 hover:bg-gray-800 rounded-md transition-colors text-gray-400 hover:text-white"
           >
@@ -189,12 +189,16 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 overflow-hidden flex flex-col">
         {currentScreen === 'dashboard' && (
-          <Dashboard 
-            onNewProject={handleNewProject} 
-            onResumeProject={(job, segments) => {
+          <Dashboard
+            onNewProject={handleNewProject}
+            onResumeProject={(job, segments, status) => {
               setJob(job);
               setSegments(segments);
-              setCurrentScreen('editor');
+              if (status === 'queued' || status === 'running') {
+                setCurrentScreen('transcribing');
+              } else {
+                setCurrentScreen('editor');
+              }
             }}
             t={t}
           />
@@ -210,7 +214,7 @@ export default function App() {
           <div className="flex items-center gap-1.5">
             <Cpu size={14} className={systemStatus?.gpu_available ? "text-green-500" : "text-blue-500"} />
             <span>
-              {systemStatus?.gpu_available ? 'GPU' : 'CPU'}: {systemStatus?.gpu_name || 'N/A'} 
+              {systemStatus?.gpu_available ? 'GPU' : 'CPU'}: {systemStatus?.gpu_name || 'N/A'}
               {' '}({systemStatus?.gpu_available ? t('app.gpuActive') : t('app.gpuInactive')})
             </span>
           </div>
@@ -230,16 +234,16 @@ export default function App() {
         </div>
       </footer>
 
-      <SettingsModal 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
         settings={appSettings}
         onSave={setAppSettings}
         t={t}
       />
-      <HelpModal 
-        isOpen={isHelpOpen} 
-        onClose={() => setIsHelpOpen(false)} 
+      <HelpModal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
         t={t}
       />
     </div>

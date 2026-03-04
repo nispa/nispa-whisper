@@ -9,6 +9,7 @@ nispa-WhisperApp is a professional desktop application for automatic transcripti
 - **Advanced Editor**: Synchronized audio/video playback with live text editing, Undo/Redo support, and bulk Find & Replace.
 - **Data-Driven UI**: Dynamic Settings and Help systems managed via centralized configurations.
 - **GPU Acceleration**: Native support for NVIDIA CUDA for lightning-fast local processing.
+- **Audio Pre-Processing**: Dynamic audio normalization filter to ensure vocal clarity across varying volume levels.
 - **AI-Ready (MCP)**: Export transcriptions in optimized JSON formats for Model Context Protocol, perfect for analysis with Gemini, ChatGPT, or Claude.
 
 ## 🛠️ Tech Stack
@@ -68,7 +69,7 @@ curl -X POST http://localhost:5000/api/transcribe \
   -F "file=@/path/to/your/audio.mp3" \
   -F "model=medium" \
   -F "language=it" \
-  -F "diarization=false"
+  -F "normalize=false"
 ```
 **Response**: `{"job_id": "uuid", "status": "queued"}`
 
@@ -124,6 +125,12 @@ nispa-whisper/
 
 ## 📝 Changelog
 
+### 2026-03-04
+- Replaced Diarization feature with Audio Normalization filter to improve voice clarity and lower initial processing requirements.
+- Implemented live 30-second audio previews for normalization comparison.
+- Fixed a bug where exporting transcriptions defaulted to `transcription.srt` instead of original filenames.
+- Fixed the `<video>` sync loop that caused playback to stutter when seeking or clicking on segments.
+
 ### 2026-03-03
 - Refactored code to a modular architecture.
 - Fixed audio waveform visualization.
@@ -135,7 +142,6 @@ nispa-whisper/
 - Centralized media states inside EditorContext.
 
 ### 2026-02-27
-- Fixed typo in localhost URL (updated from 5173 to 3000).
 - Added manual (`MANUAL.md`).
 - Initial commit and project setup.
 

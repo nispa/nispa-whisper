@@ -1,17 +1,18 @@
 export const API_BASE = 'http://localhost:5000/api';
 
-export async function startTranscription(file: File, model: string, language: string) {
+export async function startTranscription(file: File, model: string, language: string, normalize: boolean = false) {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('model', model);
   formData.append('language', language);
+  formData.append('normalize', normalize ? 'true' : 'false');
   formData.append('diarization', 'false');
 
   const res = await fetch(`${API_BASE}/transcribe`, {
     method: 'POST',
     body: formData,
   });
-  
+
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.error || 'Failed to start transcription');
@@ -72,12 +73,12 @@ export async function clearCache() {
 export async function reuploadMedia(projectId: string, file: File) {
   const formData = new FormData();
   formData.append('file', file);
-  
+
   const res = await fetch(`${API_BASE}/projects/${projectId}/reupload`, {
     method: 'POST',
     body: formData
   });
-  
+
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to reupload media');
   return data;
@@ -89,10 +90,29 @@ export async function saveProjectSegments(projectId: string, segments: any[]) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ segments })
   });
-  
+
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.error || 'Failed to save segments');
   }
   return res.json();
+}
+
+export async function getAudioPreview(file: File, normalize: boolean): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('normalize', normalize ? 'true' : 'false');
+
+  const res = await fetch(`${API_BASE}/transcribe/preview`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to generate audio preview');
+  }
+
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
 }

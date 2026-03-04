@@ -31,7 +31,8 @@ def init_db():
             diarization BOOLEAN,
             progress REAL,
             error TEXT,
-            file_hash TEXT
+            file_hash TEXT,
+            normalized BOOLEAN DEFAULT 0
         )
     ''')
     
@@ -45,6 +46,8 @@ def init_db():
         c.execute('ALTER TABLE projects ADD COLUMN full_text TEXT')
     if 'file_hash' not in columns:
         c.execute('ALTER TABLE projects ADD COLUMN file_hash TEXT')
+    if 'normalized' not in columns:
+        c.execute('ALTER TABLE projects ADD COLUMN normalized BOOLEAN DEFAULT 0')
         
     c.execute('''
         CREATE TABLE IF NOT EXISTS segments (
@@ -60,13 +63,13 @@ def init_db():
     conn.commit()
     conn.close()
 
-def create_project(project_id, name, file_path, file_name, model, language, diarization=False, file_hash=None):
+def create_project(project_id, name, file_path, file_name, model, language, diarization=False, file_hash=None, normalized=False):
     conn = get_db()
     c = conn.cursor()
     c.execute('''
-        INSERT INTO projects (id, name, created_at, status, file_path, file_name, model, language, diarization, progress, file_hash)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (project_id, name, datetime.now().isoformat(), 'queued', file_path, file_name, model, language, diarization, 0.0, file_hash))
+        INSERT INTO projects (id, name, created_at, status, file_path, file_name, model, language, diarization, progress, file_hash, normalized)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (project_id, name, datetime.now().isoformat(), 'queued', file_path, file_name, model, language, diarization, 0.0, file_hash, normalized))
     conn.commit()
     conn.close()
 

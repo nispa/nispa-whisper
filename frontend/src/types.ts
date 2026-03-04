@@ -3,6 +3,7 @@ export type Screen = 'dashboard' | 'setup' | 'transcribing' | 'editor';
 export interface Project {
   id: string;
   name: string;
+  file_name?: string;
   date: string;
   duration: string;
   language: string;
@@ -11,6 +12,7 @@ export interface Project {
   full_text?: string;
   speakers: number;
   thumbnail?: string;
+  normalized?: boolean;
 }
 
 export interface Segment {
@@ -27,4 +29,5 @@ export interface TranscriptionJob {
   model: string;
   language: string;
   saveLocation: string;
+  normalize?: boolean;
 }
